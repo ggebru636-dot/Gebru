@@ -1,6 +1,5 @@
 <?php
 // inc/header.php
-// This file outputs the <head> and top navigation. Included by pages.
 if (!isset($page_title)) $page_title = 'Tigray Volleyball Federation';
 ?>
 <!doctype html>
@@ -17,7 +16,12 @@ if (!isset($page_title)) $page_title = 'Tigray Volleyball Federation';
 
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-      <a class="navbar-brand" href="/">Tigray Volleyball Federation</a>
+      <a class="navbar-brand d-flex align-items-center" href="/">
+        <?php if (file_exists(__DIR__ . '/../assets/images/logo.png')): ?>
+          <img src="/assets/images/logo.png" alt="TVF logo" style="height:42px; margin-right:10px;">
+        <?php endif; ?>
+        <span>Tigray Volleyball Federation</span>
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
