@@ -19,6 +19,7 @@ require_admin();
         <ul class="navbar-nav ms-auto">
           <li class="nav-item"><a class="nav-link" href="/admin/news_list.php">News</a></li>
           <li class="nav-item"><a class="nav-link" href="/admin/events_list.php">Events</a></li>
+          <li class="nav-item"><a class="nav-link" href="/admin/contacts.php">Contacts</a></li>
           <li class="nav-item"><a class="nav-link" href="/admin/logout.php">Logout</a></li>
         </ul>
       </div>
@@ -30,18 +31,25 @@ require_admin();
     <p>Welcome, <?=htmlspecialchars($_SESSION['admin_user']['username'])?>.</p>
 
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-4">
         <div class="card mb-3"><div class="card-body">
           <h5 class="card-title">News</h5>
           <p>Add or manage news articles.</p>
           <a href="/admin/news_list.php" class="btn btn-sm btn-primary">Manage News</a>
         </div></div>
       </div>
-      <div class="col-md-6">
+      <div class="col-md-4">
         <div class="card mb-3"><div class="card-body">
           <h5 class="card-title">Events</h5>
           <p>Manage events and fixtures.</p>
           <a href="/admin/events_list.php" class="btn btn-sm btn-primary">Manage Events</a>
+        </div></div>
+      </div>
+      <div class="col-md-4">
+        <div class="card mb-3"><div class="card-body">
+          <h5 class="card-title">Contacts</h5>
+          <p>View messages submitted via the contact form.</p>
+          <a href="/admin/contacts.php" class="btn btn-sm btn-primary">View Contacts</a>
         </div></div>
       </div>
     </div>
