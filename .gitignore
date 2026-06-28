@@ -1,0 +1,4 @@
+# .gitignore
+# Ignore runtime data and uploads
+/data/
+/uploads/
