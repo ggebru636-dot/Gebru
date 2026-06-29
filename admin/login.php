@@ -13,6 +13,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $u = $_POST['username'] ?? '';
     $p = $_POST['password'] ?? '';
     if (admin_login($u, $p)) {
+        // Check if password change is forced
+        $userId = $_SESSION['admin_user']['id'];
+        $stmt = $pdo->prepare('SELECT force_password_change FROM users WHERE id = :id');
+        $stmt->execute([':id'=>$userId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row && $row['force_password_change']) {
+            header('Location: /admin/change_password.php?forced=1');
+            exit;
+        }
         header('Location: /admin/');
         exit;
     } else {
@@ -48,8 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               </div>
               <button class="btn btn-primary">Login</button>
             </form>
-            <hr>
-            <p class="small text-muted">Use the seed script to create an initial admin user.</p>
           </div>
         </div>
       </div>
