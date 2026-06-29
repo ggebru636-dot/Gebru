@@ -19,87 +19,50 @@ try {
         }
     } else {
         // Run migrations for existing database
-        // Add archived column to contacts if missing
-        $stmt = $pdo->prepare("PRAGMA table_info(contacts)");
-        $stmt->execute();
-        $columns = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $col_names = array_column($columns, 'name');
-        if (!in_array('archived', $col_names)) {
-            $pdo->exec("ALTER TABLE contacts ADD COLUMN archived INTEGER DEFAULT 0");
+        $migrations = [
+            'contacts' => 'archived INTEGER DEFAULT 0',
+            'users' => 'force_password_change INTEGER DEFAULT 0',
+            'events' => [
+                'event_type TEXT DEFAULT \'match\'',
+                'home_team TEXT',
+                'away_team TEXT',
+                'home_score INTEGER',
+                'away_score INTEGER',
+                'status TEXT DEFAULT \'scheduled\''
+            ]
+        ];
+        
+        foreach ($migrations as $table => $cols) {
+            $stmt = $pdo->prepare("PRAGMA table_info($table)");
+            $stmt->execute();
+            $columns = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $col_names = array_column($columns, 'name');
+            
+            $col_array = is_array($cols) ? $cols : [$cols];
+            foreach ($col_array as $col_def) {
+                $col_name = explode(' ', $col_def)[0];
+                if (!in_array($col_name, $col_names)) {
+                    try {
+                        $pdo->exec("ALTER TABLE $table ADD COLUMN $col_def");
+                    } catch (Exception $e) {
+                        // Column may already exist
+                    }
+                }
+            }
         }
-        // Add force_password_change column to users if missing
-        $stmt = $pdo->prepare("PRAGMA table_info(users)");
-        $stmt->execute();
-        $columns = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $col_names = array_column($columns, 'name');
-        if (!in_array('force_password_change', $col_names)) {
-            $pdo->exec("ALTER TABLE users ADD COLUMN force_password_change INTEGER DEFAULT 0");
-        }
-        // Add event_type, home_team, away_team, home_score, away_score, status columns to events if missing
-        $stmt = $pdo->prepare("PRAGMA table_info(events)");
-        $stmt->execute();
-        $columns = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $col_names = array_column($columns, 'name');
-        if (!in_array('event_type', $col_names)) {
-            $pdo->exec("ALTER TABLE events ADD COLUMN event_type TEXT DEFAULT 'match'");
-        }
-        if (!in_array('home_team', $col_names)) {
-            $pdo->exec("ALTER TABLE events ADD COLUMN home_team TEXT");
-        }
-        if (!in_array('away_team', $col_names)) {
-            $pdo->exec("ALTER TABLE events ADD COLUMN away_team TEXT");
-        }
-        if (!in_array('home_score', $col_names)) {
-            $pdo->exec("ALTER TABLE events ADD COLUMN home_score INTEGER");
-        }
-        if (!in_array('away_score', $col_names)) {
-            $pdo->exec("ALTER TABLE events ADD COLUMN away_score INTEGER");
-        }
-        if (!in_array('status', $col_names)) {
-            $pdo->exec("ALTER TABLE events ADD COLUMN status TEXT DEFAULT 'scheduled'");
-        }
-        // Create teams table if missing
-        $stmt = $pdo->prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='teams'");
-        $stmt->execute();
-        if (!$stmt->fetch()) {
-            $pdo->exec("CREATE TABLE teams (
-              id INTEGER PRIMARY KEY AUTOINCREMENT,
-              name TEXT UNIQUE NOT NULL,
-              slug TEXT UNIQUE NOT NULL,
-              logo TEXT,
-              description TEXT,
-              created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            )");
-        }
-        // Create players table if missing
-        $stmt = $pdo->prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='players'");
-        $stmt->execute();
-        if (!$stmt->fetch()) {
-            $pdo->exec("CREATE TABLE players (
-              id INTEGER PRIMARY KEY AUTOINCREMENT,
-              name TEXT NOT NULL,
-              team_id INTEGER NOT NULL,
-              number INTEGER,
-              position TEXT,
-              bio TEXT,
-              photo TEXT,
-              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-              FOREIGN KEY(team_id) REFERENCES teams(id) ON DELETE CASCADE
-            )");
-        }
-        // Create standings table if missing
-        $stmt = $pdo->prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='standings'");
-        $stmt->execute();
-        if (!$stmt->fetch()) {
-            $pdo->exec("CREATE TABLE standings (
-              id INTEGER PRIMARY KEY AUTOINCREMENT,
-              team_id INTEGER NOT NULL UNIQUE,
-              wins INTEGER DEFAULT 0,
-              losses INTEGER DEFAULT 0,
-              points INTEGER DEFAULT 0,
-              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-              FOREIGN KEY(team_id) REFERENCES teams(id) ON DELETE CASCADE
-            )");
+        
+        // Create missing tables
+        $tables = ['gallery', 'memberships', 'referees', 'courses', 'sponsors', 'newsletter_subscribers'];
+        foreach ($tables as $table) {
+            $stmt = $pdo->prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?");
+            $stmt->execute([$table]);
+            if (!$stmt->fetch()) {
+                // Create table logic - read from schema and extract
+                $schema_file = file_get_contents(__DIR__ . '/schema.sql');
+                if (preg_match("/CREATE TABLE IF NOT EXISTS $table \(.*?\);/s", $schema_file, $matches)) {
+                    $pdo->exec($matches[0]);
+                }
+            }
         }
     }
 } catch (Exception $e) {

@@ -73,3 +73,68 @@ CREATE TABLE IF NOT EXISTS standings (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY(team_id) REFERENCES teams(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS gallery (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  description TEXT,
+  image_url TEXT NOT NULL,
+  media_type TEXT DEFAULT 'photo',
+  uploaded_by INTEGER,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(uploaded_by) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS memberships (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  membership_type TEXT,
+  status TEXT DEFAULT 'pending',
+  payment_status TEXT DEFAULT 'unpaid',
+  notes TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS referees (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  email TEXT,
+  phone TEXT,
+  level TEXT,
+  certification_date DATETIME,
+  bio TEXT,
+  photo TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS courses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  description TEXT,
+  instructor TEXT,
+  course_type TEXT,
+  start_date DATETIME,
+  end_date DATETIME,
+  capacity INTEGER,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS sponsors (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  logo TEXT,
+  website TEXT,
+  tier TEXT DEFAULT 'bronze',
+  contact_email TEXT,
+  phone TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT UNIQUE NOT NULL,
+  subscribed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  unsubscribed_at DATETIME
+);
