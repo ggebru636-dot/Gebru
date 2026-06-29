@@ -1,23 +1,8 @@
 <?php
-// admin/news_edit.php (Edit news)
+// admin/news_add.php (Add news)
 require_once __DIR__ . '/../inc/auth.php';
 require_admin();
 require_once __DIR__ . '/../inc/db.php';
-
-$id = isset($_GET['id']) && ctype_digit($_GET['id']) ? (int)$_GET['id'] : 0;
-if ($id === 0) {
-    header('Location: /admin/news_list.php');
-    exit;
-}
-
-$stmt = $pdo->prepare('SELECT * FROM news WHERE id = ?');
-$stmt->execute([$id]);
-$article = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$article) {
-    header('Location: /admin/news_list.php');
-    exit;
-}
 
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -32,12 +17,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (empty($errors)) {
         try {
-            $pdo->prepare('UPDATE news SET title = ?, slug = ?, content = ?, image = ? WHERE id = ?')
-                ->execute([$title, $slug, $content, $image ?: null, $id]);
+            $pdo->prepare('INSERT INTO news (title, slug, content, image) VALUES (?, ?, ?, ?)')
+                ->execute([$title, $slug, $content, $image ?: null]);
             header('Location: /admin/news_list.php');
             exit;
         } catch (Exception $e) {
-            $errors[] = 'Error updating article: ' . $e->getMessage();
+            $errors[] = 'Slug must be unique. ' . $e->getMessage();
         }
     }
 }
@@ -47,12 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Edit News</title>
+    <title>Add News</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   </head>
   <body>
   <div class="container my-5">
-    <h1>Edit News Article</h1>
+    <h1>Add News Article</h1>
     <?php if (!empty($errors)): ?>
       <div class="alert alert-danger"><?php foreach ($errors as $e) echo '<div>' . htmlspecialchars($e) . '</div>'; ?></div>
     <?php endif; ?>
@@ -60,22 +45,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form method="post" class="row g-3">
       <div class="col-12">
         <label class="form-label">Title *</label>
-        <input type="text" name="title" class="form-control" value="<?=htmlspecialchars($article['title'])?>" required>
+        <input type="text" name="title" class="form-control" required>
       </div>
       <div class="col-12">
-        <label class="form-label">Slug *</label>
-        <input type="text" name="slug" class="form-control" value="<?=htmlspecialchars($article['slug'])?>" required>
+        <label class="form-label">Slug (URL-friendly title) *</label>
+        <input type="text" name="slug" class="form-control" required>
       </div>
       <div class="col-12">
         <label class="form-label">Content *</label>
-        <textarea name="content" class="form-control" rows="6" required><?=htmlspecialchars($article['content'])?></textarea>
+        <textarea name="content" class="form-control" rows="6" required></textarea>
       </div>
       <div class="col-12">
         <label class="form-label">Image URL</label>
-        <input type="url" name="image" class="form-control" value="<?=htmlspecialchars($article['image'] ?? '')?>">
+        <input type="url" name="image" class="form-control" placeholder="https://example.com/image.jpg">
       </div>
       <div class="col-12">
-        <button class="btn btn-primary">Update Article</button>
+        <button class="btn btn-primary">Create Article</button>
         <a href="/admin/news_list.php" class="btn btn-secondary">Cancel</a>
       </div>
     </form>
