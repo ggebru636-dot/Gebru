@@ -14,6 +14,41 @@
       .navbar-brand { font-weight: bold; color: var(--brand) !important; }
       .btn-primary { background-color: var(--brand); border-color: var(--brand); }
       .btn-primary:hover { background-color: #0056b3; }
+      
+      /* Hero Header Styles */
+      .hero-header {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        padding: 60px 20px;
+        text-align: center;
+      }
+      .hero-header h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      }
+      .hero-header p {
+        font-size: 1.25rem;
+        margin-bottom: 0;
+        opacity: 0.95;
+      }
+      .hero-header .breadcrumb {
+        background: rgba(255,255,255,0.2);
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin-top: 20px;
+        display: inline-block;
+      }
+      .hero-header .breadcrumb-item {
+        color: rgba(255,255,255,0.8);
+      }
+      .hero-header .breadcrumb-item.active {
+        color: white;
+      }
+      .hero-header .breadcrumb-item+.breadcrumb-item::before {
+        color: rgba(255,255,255,0.6);
+      }
     </style>
   </head>
   <body>
@@ -40,4 +75,33 @@
       </div>
     </div>
   </nav>
+  
+  <?php
+  // Helper function to display hero header
+  function display_hero($title, $subtitle = '', $breadcrumbs = []) {
+    echo '<div class="hero-header">';
+    echo '<div class="container">';
+    echo '<h1>' . htmlspecialchars($title) . '</h1>';
+    if ($subtitle) {
+      echo '<p>' . htmlspecialchars($subtitle) . '</p>';
+    }
+    if (!empty($breadcrumbs)) {
+      echo '<nav aria-label="breadcrumb">';
+      echo '<ol class="breadcrumb justify-content-center">';
+      echo '<li class="breadcrumb-item"><a href="/" style="color: rgba(255,255,255,0.8);">Home</a></li>';
+      foreach ($breadcrumbs as $crumb => $link) {
+        if ($link) {
+          echo '<li class="breadcrumb-item"><a href="' . htmlspecialchars($link) . '" style="color: rgba(255,255,255,0.8);">' . htmlspecialchars($crumb) . '</a></li>';
+        } else {
+          echo '<li class="breadcrumb-item active">' . htmlspecialchars($crumb) . '</li>';
+        }
+      }
+      echo '</ol>';
+      echo '</nav>';
+    }
+    echo '</div>';
+    echo '</div>';
+  }
+  ?>
+  
   <main>
